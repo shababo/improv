@@ -179,6 +179,10 @@ class AbstractActor:
         """
         pass
 
+    def _stop(self):
+        logger.info(f"Stopping {self.name}")
+        self.stop()
+
     def changePriority(self):
         """Try to lower this process' priority
         Only changes priority if lower_priority is set
@@ -218,9 +222,9 @@ class AsyncActor(AbstractActor):
 
         # Define dictionary of actions for the RunManager
         self.actions = {}
-        self.actions["setup"] = self.setup
+        self.actions["setup"] = self._setup
         self.actions["run"] = self.runStep
-        self.actions["stop"] = self.stop
+        self.actions["stop"] = self._stop
 
     def run(self):
         """Run the actor in an async loop"""
