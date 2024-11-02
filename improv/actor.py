@@ -18,17 +18,25 @@ class AbstractActor:
     Also needs to be responsive to sent Signals (e.g. run, setup, etc)
     """
 
-    def __init__(self, name, store_loc, method="fork"):
+    def __init__(self, 
+            name, 
+            store_loc = None, 
+            method="fork",
+            links = None,
+            client = None,
+            lower_priority = False,    
+            q_watchout = None,
+        ):
         """Require a name for multiple instances of the same actor/class
         Create initial empty dict of Links for easier referencing
         """
-        self.q_watchout = None
+        self.q_watchout = q_watchout
         self.name = name
-        self.links = {}
+        self.links = links or {}
         self.method = method
-        self.client = None
+        self.client = client
         self.store_loc = store_loc
-        self.lower_priority = False
+        self.lower_priority = lower_priority
 
         # Start with no explicit data queues.
         # q_in and q_out are reserved for passing ID information
@@ -150,6 +158,12 @@ class AbstractActor:
         """
         pass
 
+    def _setup(self):
+
+        logger.info(f"Beginning setup for {self.name}")
+        self.setup()
+        logger.info(f"Completed setup for {self.name}")
+
     def run(self):
         """Must run in continuous mode
         Also must check q_sig either at top of a run-loop
@@ -181,8 +195,8 @@ class AbstractActor:
 
 
 class ManagedActor(AbstractActor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
 
         # Define dictionary of actions for the RunManager
         self.actions = {}
